@@ -6,42 +6,46 @@ use Illuminate\Http\Request;
 
 class ParserController extends Controller
 {
-    public function parser(request $request){
-        if($request->hasFile('filename')) {
+    public function parser(request $request)
+    {
+        if ($request->hasFile('filename')) {
             $file = $request->file('filename');
+        } else {
+            return 'Файл не загружен';
         }
-        $openFile = file($file);
+        $strings = file($file);
         $words = [];
         $traffic = 0;
-        $bots=[];
-        foreach ($openFile as $string) {
+        $bots = [];
+        foreach ($strings as $string) {
             $bot = stripos($string, 'bot');
-            if ($bot){
-                $bots[]= $string;
+            if ($bot) {
+                $bots[] = $string;
             }
-            $words[] = explode(" ",$string);
+            $words[] = explode(" ", $string);
         }
-        foreach ($words as $word){
+        foreach ($words as $word) {
             // подсчет траффика для POST запросов
-            if($word[5]=='"POST'){
-                if($traffic==0){
+            if ($word[5] == '"POST') {
+                if ($traffic == 0) {
                     $traffic = $word[9];
                 } else {
                     $traffic = $traffic + $word[9];
                 }
             }
         }
-        $views = count($openFile);
+        $views = count($strings);
         $url = array_count_values(array_column($words, 6));
         $statusCode = array_count_values(array_column($words, 8));
 
-        $result = [];
-        $result['views'] = $views;
-        $result['urls'] = count($url);
-        $result['traffic'] = $traffic;
-        $result['statusCode'] = $statusCode;
-        $result['countBots'] = count($bots);
+        $result = [
+            'views'=>$views,
+            'urls'=>count($url),
+            'traffic'=>$traffic,
+            'statusCode'=>$statusCode,
+            'countBots'=>count($bots)
+        ];
 
-        return response()->json($result,200);
+        return response()->json($result, 200);
     }
 }
