@@ -15,8 +15,8 @@ class ParserController extends Controller
         }
         $strings = file($file);
         $words = [];
-        $traffic = 0;
         $bots = [];
+        $traffic = 0;
         foreach ($strings as $string) {
             $bot = stripos($string, 'bot');
             if ($bot) {
